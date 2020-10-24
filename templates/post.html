@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Записи пользователя {{ user.username }}{% endblock %}
+{% block header %}{% endblock %}
+{% block content %}
+
+<main role="main" class="container">
+    <div class="row">
+        <div class="col-md-3 mb-3 mt-1">
+            <div class="card">
+                <div class="card-body">
+                    <div class="h2">
+                        {{ post_one.0.author.first_name }} {{ post_one.0.author.last_name }}
+                    </div>
+                    <div class="h3 text-muted">
+                        @{{ post_one.0.author.username }}
+                    </div>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <div class="h6 text-muted">
+                            Подписчиков: XXX <br />
+                            Подписан: XXX
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="h6 text-muted">
+                            Записей: {{ posts }}
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card mb-3 mt-1 shadow-sm">
+                <div class="card-body">
+                    <p class="card-text">
+                        <a href="/{{ post_one.0.author.username }}/"><strong class="d-block text-gray-dark">@{{ post_one.0.author.username }}</strong></a>
+                        {{ post_one.0.text }} 
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group ">
+                            {% if user.username == post_one.0.author.username %}
+                            <a class="btn btn-sm text-muted" href="/{{ post_one.0.author.username }}/{{ post_one.0.id }}/edit" role="button">Редактировать</a>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">{{ post_one.0.pub_date|date:"d M Y г. H:i" }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main> 
+
+{% endblock %}
