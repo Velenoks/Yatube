@@ -5,14 +5,14 @@
 
 {% for post in page %}
   <h3>
-    Автор: {{ post.author.get_full_name }}, Дата публикации: {{ post.pub_date|date:"d M Y" }}, Группа: {{ post.group }}
+    Автор: {{ post.author.username }}, Дата публикации: {{ post.pub_date|date:"d M Y" }}, Группа: {{ post.group }}
   </h3>
   <p>{{ post.text|linebreaksbr }}</p>
   {% if not forloop.last %}<hr>{% endif %}
 {% endfor %}
 
 {% if page.has_other_pages %}
-  {% include "paginator.html" with items=page paginator=paginator%}
+  {% include "includes/paginator.html" with items=page paginator=paginator%}
 {% endif %}
 
 {% endblock %}

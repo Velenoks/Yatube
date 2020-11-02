@@ -1,7 +1,6 @@
-import datetime as dt
-
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import PostForm
@@ -16,7 +15,10 @@ def index(request):
     return render(
         request, 
         "index.html", 
-        {"page": page, "paginator": paginator},
+        {
+            "page": page, 
+            "paginator": paginator,
+            },
         )
 
 
@@ -29,7 +31,11 @@ def group_posts(request, slug):
     return render(
         request, 
         "group.html", 
-        {"group": group, "page": page, "paginator": paginator},
+        {
+            "group": group, 
+            "page": page, 
+            "paginator": paginator,
+            },
         )
 
 
@@ -38,48 +44,53 @@ def new_post(request):
     new_title = "Новая запись"
     new_button = "Добавить"
     new_header = "Добавить запись"
-    if request.method == "POST":
-        form = PostForm(request.POST)
-        if form.is_valid():
-            new_post = form.save(commit=False)
-            new_post.author = request.user
-            new_post.save()
-            return redirect("index")
-        return render(
-            request, 
-            "new_post.html", 
-            {"form": form, "new_title": new_title, "new_button": new_button,"new_header": new_header},
-            )
-    form = PostForm()
+    form = PostForm(request.POST or None)
+    if form.is_valid():
+        new_post = form.save(commit=False)
+        new_post.author = request.user
+        new_post.save()
+        return redirect("index")
     return render(
         request, 
         "new_post.html", 
-        {"form": form, "new_title": new_title, "new_button": new_button,"new_header": new_header},
+        {
+            "form": form, 
+            "title": new_title, 
+            "button": new_button,
+            "header": new_header,
+            },
         )
 
 
 def profile(request, username):
-    user = get_object_or_404(User, username=username)
-    post_list = Post.objects.filter(author=user)
-    posts = post_list.count()
+    author = get_object_or_404(User, username=username)
+    post_list = Post.objects.filter(author=author)
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
     return render(
         request, 
         "profile.html", 
-        {"posts": posts, "page": page, "paginator": paginator},
+        {
+            "author": author, 
+            "page": page, 
+            "paginator": paginator,
+            },
         )
 
  
 def post_view(request, username, post_id):
-    user = get_object_or_404(User, username=username)
-    post_one = Post.objects.filter(id=post_id)
-    posts = Post.objects.filter(author=user).count()
+    post = get_object_or_404(Post, id=post_id, author__username=username)
+    author = post.author
+    posts = Post.objects.filter(author=author).count()
     return render(
         request, 
         "post.html", 
-        {"posts": posts, "post_one": post_one}
+        {
+            "post": post,
+            "author": author, 
+            "posts": posts
+            }
         )
 
 
@@ -91,22 +102,18 @@ def post_edit(request, username, post_id):
     post = get_object_or_404(Post, pk=post_id)
     if post.author != request.user:
         return redirect("post", username=post.author, post_id=post.pk)
-    if request.method == "POST":
-        form = PostForm(request.POST, instance=post)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.pub_date = dt.datetime.now()
-            post.save()
-            return redirect("index")
-        return render(
-            request, 
-            "new_post.html", 
-            {"form": form, "edit_title": edit_title, "edit_button": edit_button,"edit_header": edit_header},
-            )
-    else:
-        form = PostForm(instance=post)
+    form = PostForm(request.POST or None, instance=post)
+    if form.is_valid():
+        post.save()
+        return redirect("post", username=post.author, post_id=post.pk)
     return render(
         request, 
         "new_post.html", 
-        {"form": form, "edit_title": edit_title, "edit_button": edit_button,"edit_header": edit_header},
+        {
+            "post": post, 
+            "form": form, 
+            "title": edit_title, 
+            "button": edit_button,
+            "header": edit_header,
+            },
         )
