@@ -18,4 +18,10 @@ __pycache__/
 
 .vscode/
 
+static/
+posts/static/
+
+media/
+posts/media/
+
 db.sqlite3

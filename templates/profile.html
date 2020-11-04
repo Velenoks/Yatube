@@ -3,6 +3,7 @@
 {% block header %}{% endblock %}
 {% block content %}
 
+
 <main role="main" class="container">
     <div class="row">
         {% include 'card_user.html' %}
@@ -10,6 +11,7 @@
     <div class="col-md-9">                
         {% for post in page %}
             <div class="card mb-3 mt-1 shadow-sm">
+                {% include 'includes/image.html' %}
                 <div class="card-body">
                     {% include 'card_post.html' %}
 

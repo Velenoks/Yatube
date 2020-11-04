@@ -3,7 +3,7 @@
     {{ post.text|linebreaksbr }}
 </p>
 <div class="d-flex justify-content-between align-items-center">
-    <div class="btn-group ">
+    <div class="btn-group">
         {% if user.username == post.author.username %}
         <a class="btn btn-sm text-muted" href={% url 'post_edit' username=author.username post_id=post.id %} role="button">Редактировать</a>
         {% endif %}

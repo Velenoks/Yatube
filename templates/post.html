@@ -9,10 +9,12 @@
 
         <div class="col-md-9"> 
             <div class="card mb-3 mt-1 shadow-sm">
+                {% include 'includes/image.html' %}
                 <div class="card-body">
                     {% include 'card_post.html' %}
                 </div>
             </div>
+            {% include 'comments.html' %}
         </div>
     </div>
 </main> 

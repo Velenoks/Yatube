@@ -1,0 +1,4 @@
+{% load thumbnail %}
+{% thumbnail post.image "1020x600" crop="center" upscale=True as im %}
+    <img class="card-img" src="{{ im.url }}">
+{% endthumbnail %}
