@@ -1,31 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Последние обновления{% endblock %}
-{% block header %}Последние обновления на сайте{% endblock %}
+{% block header %}{% endblock %}
 {% block content %}
 
+    <div class="container">
+           <h1> Последние обновления на сайте</h1>
+                {% load cache %}
+                {% cache 20 index_page %}
+                {% for post in page %}
+                    {% include "includes/post_item.html" with post=post %}
+                {% endfor %}
+                {% endcache %}
+    </div>
 
-{% for post in page %}
-  <div class="card mb-3 mt-1 shadow-sm">
-    {% include 'includes/image.html' %}
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center">
-        <h3>
-          {% if post.group != NULL %}
-          Автор: <a href={% url 'profile' username=post.author.username %}>{{ post.author.username }}</a> - Дата публикации: {{ post.pub_date|date:"d M Y" }} - Группа: <a href={% url 'group' slug=post.group.slug %}>{{ post.group }}</a>
-          {% else %}
-          Автор: <a href={% url 'profile' username=post.author.username %}>{{ post.author.username }}</a> - Дата публикации: {{ post.pub_date|date:"d M Y" }} - Группа: Без группы
-          {% endif %}
-        </h3>
-        </div>
-        <p class="card-text">{{ post.text|linebreaksbr }}</p>
-      </div>
-  </div>
-{% if not forloop.last %}<hr>{% endif %}
-{% endfor %}
-
-{% if page.has_other_pages %}
-  {% include "includes/paginator.html" with items=page paginator=paginator%}
-{% endif %}
+        {% if page.has_other_pages %}
+            {% include "includes/paginator.html" with items=page paginator=paginator%}
+        {% endif %}
 
 
 {% endblock %}

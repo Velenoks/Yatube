@@ -3,17 +3,13 @@
 {% block header %}{{ group.title }}{% endblock %}
 {% block content %}
 
-    <p>
+
+    <h4>
         {{group.description}}
-    </p>
+    </h4>
 
     {% for post in page %}
-    {% include 'includes/image.html' %}
-    <h3>
-        Автор: {{ post.author.username }}, Дата публикации: {{ post.pub_date|date:"d M Y" }}
-    </h3>
-    <p>{{ post.text|linebreaksbr }}</p>
-    {% if not forloop.last %}<hr>{% endif %}
+        {% include "includes/post_item.html" with post=post %}
     {% endfor %}
 
     {% if page.has_other_pages %}

@@ -5,6 +5,7 @@ from django.urls import reverse
 from posts.models import Post, Group
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.cache import cache
 
 
 class PostsTests(TestCase):
@@ -93,6 +94,7 @@ class PostsTests(TestCase):
         post_url = reverse('post', args=[self.user.username, post.id])
         urls_list = self.urls_list
         urls_list.append(post_url)
+        cache.clear()
         for url in self.urls_list:
             webpage = self.unauthorized_client.get(url)
             self.assertContains(webpage, "<img")
@@ -109,8 +111,25 @@ class PostsTests(TestCase):
             follow=True)
         self.assertEqual(Post.objects.count(), current_posts_count)
 
+    def test_cash(self):
+        """Проверяем работу кэша."""
+        text = 'Проверяем работу кэш'
+        webpage = self.unauthorized_client.get(self.index_url)
+        post = Post.objects.create(
+            author=self.user,
+            text=text,
+            group=self.group
+        )
+        webpage = self.unauthorized_client.get(self.index_url)
+        self.assertNotIn(text, webpage.content.decode('UTF-8'))
+        cache.clear()
+        webpage = self.unauthorized_client.get(self.index_url)
+        self.assertEqual(text, webpage.context['page'].object_list[0].text)
+
+
     def url_test(self, post, urls_list):
         for url in urls_list:
+            cache.clear()
             webpage = self.unauthorized_client.get(url)
             if 'paginator' in webpage.context.keys():
                 post_web = webpage.context['page'].object_list[0]

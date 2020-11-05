@@ -8,18 +8,9 @@
     <div class="row">
         {% include 'card_user.html' %}
 
-    <div class="col-md-9">                
+    <div class="col-md-9">
         {% for post in page %}
-            <div class="card mb-3 mt-1 shadow-sm">
-                {% include 'includes/image.html' %}
-                <div class="card-body">
-                    {% include 'card_post.html' %}
-
-                    <a class="btn btn-sm text-muted" href={% url 'post' username=author.username post_id=post.id %} role="button">Добавить комментарий</a>
-
-                </div>
-            </div>
-        {% if not forloop.last %}<hr>{% endif %}
+            {% include "includes/post_item.html" with post=post %}
         {% endfor %}
 
         {% if page.has_other_pages %}
