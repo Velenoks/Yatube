@@ -21,6 +21,9 @@
 <!-- Комментарии -->
 {% for item in comments %}
 <div class="media card mb-4">
+    {% if user == item.author %}
+    <a href="{% url 'delete_comment' username=author.username post_id=post.id comment_id=item.id %}" class="btn btn-danger" role="button">Удалить коментарий</a>
+    {% endif %}
     <div class="media-body card-body">
         <h5 class="mt-0">
             <a href="{% url 'profile' item.author.username %}"

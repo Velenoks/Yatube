@@ -1,11 +1,15 @@
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
+from posts.models import Post
 
 
 class StaticURLTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='Witcher')
+        self.post_user = Post.objects.create(
+            author=self.user,
+            text='Новый пост Witcher')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         self.unauthorized_client = Client()
@@ -32,6 +36,17 @@ class StaticURLTests(TestCase):
         self.assertRedirects(
             response,
             '/auth/login/?next=/new/',
+            status_code=302,
+            target_status_code=200)
+
+    def test_subscription(self):
+        """Коментарий от неавторизованного пользователя."""
+        response = self.unauthorized_client.get(reverse(
+            'add_comment',
+            args=[self.user.username, self.post_user.id]))
+        self.assertRedirects(
+            response,
+            '/auth/login/?next=/Witcher/1/comment',
             status_code=302,
             target_status_code=200)
 

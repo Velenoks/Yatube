@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-
 User = get_user_model()
 
 
@@ -11,7 +10,7 @@ class Group(models.Model):
         max_length=200,
     )
     slug = models.SlugField(
-        verbose_name='URL',
+        verbose_name="URL",
         max_length=50,
         unique=True,
     )
@@ -28,7 +27,9 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    text = models.TextField()
+    text = models.TextField(
+        verbose_name="Текст",
+    )
     pub_date = models.DateTimeField(
         "date published",
         auto_now_add=True,
@@ -37,17 +38,20 @@ class Post(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        verbose_name="Автор",
         related_name="posts",
     )
     group = models.ForeignKey(
         Group,
+        verbose_name="Группа",
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
         related_name="posts",
     )
     image = models.ImageField(
-        upload_to='posts/',
+        upload_to="posts/",
+        verbose_name="Картинка",
         blank=True,
         null=True,
     )
@@ -65,15 +69,43 @@ class Comment(models.Model):
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
+        verbose_name="Пост",
         related_name="comments",
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        verbose_name="Автор комментария",
         related_name="comments",
     )
-    text = models.TextField()
+    text = models.TextField(verbose_name="Текст комментария")
     created = models.DateTimeField(
-        "date published",
+        "Дата публикации",
         auto_now_add=True,
     )
+
+    class Meta:
+        ordering = ("-created",)
+        verbose_name = "Комментарий"
+        verbose_name_plural = "Комментарии"
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Пользователь",
+        related_name="follower",
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Автор",
+        related_name="following",
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "author"],
+                                    name="unique_follow"),
+        ]
