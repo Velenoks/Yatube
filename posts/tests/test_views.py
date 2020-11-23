@@ -1,4 +1,7 @@
+import shutil
+import tempfile
 from unittest.mock import MagicMock
+from django.conf import settings
 from django.core.files import File
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -10,6 +13,16 @@ from PIL import Image
 
 
 class PreparationTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
+        super().tearDownClass()
+
     def setUp(self):
         self.user = User.objects.create_user(username='Witcher')
         self.user1 = User.objects.create_user(username='Geralt')
@@ -74,6 +87,7 @@ class PostTest(PreparationTests):
 
     def test_post_edit(self):
         """Проверяем редактируемость поста."""
+        cache.clear()
         post = Post.objects.create(
             author=self.user,
             text='Новый пост')
@@ -101,6 +115,21 @@ class PostTest(PreparationTests):
                 self.assertEqual(post.text, post_web.text)
                 self.assertEqual(post.author, post_web.author)
                 self.assertEqual(post.group, post_web.group)
+
+
+class UrlTest(PreparationTests):
+    def test_new_post(self):
+        """URL-адрес использует соответствующий шаблон."""
+        templates_pages_names = {
+            'index.html': reverse('index'),
+            'new_post.html': reverse('new_post'),
+            'group.html': reverse('group', args=[self.group.slug]),
+            'profile.html': reverse('profile', args=[self.user.username]),
+        }
+        for template, reverse_name in templates_pages_names.items():
+            with self.subTest(reverse_name=reverse_name):
+                response = self.authorized_client.get(reverse_name)
+                self.assertTemplateUsed(response, template)
 
 
 class FileTest(PreparationTests):

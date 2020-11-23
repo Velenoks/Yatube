@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Последние обновления{% endblock %}
+{% block header %}{% endblock %}
+{% block content %}
+
+
+  {% for user in users %}
+  <div class="col mb-1">
+    <div class="card">
+      <div class="card-body">
+      <a name="{{ user.username }}" href="{% url 'profile' user.username %}">
+        <strong class="d-block text-gray-dark">@{{ user.username }}</strong>
+      </a>
+        <dl class="row">
+          <dt class="col-sm-3">Имя</dt>
+          <dd class="col-sm-9">{{ user.first_name }}</dd>
+
+          <dt class="col-sm-3">Фамилия</dt>
+          <dd class="col-sm-9">{{ user.last_name }}</dd>
+
+          {% if user.is_staff %}
+          <dt class="col-sm-3">Администратор</dt>
+          <dd class="col-sm-9">Может позвать фиксиков, если что</dd>
+          {% endif %}
+
+          <dt class="col-sm-3">Был на сайте</dt>
+          <dd class="col-sm-9">
+            {% if user.last_login != None  %}
+            {{ user.last_login }}
+            {% else %}
+            А его тут и небыло :(
+            {% endif %}
+          </dd>
+
+          <dt class="col-sm-3">Пользователь родился</dt>
+          <dd class="col-sm-9">
+            {{ user.date_joined }}
+          </dd>
+
+        </dl>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+{% endblock %}

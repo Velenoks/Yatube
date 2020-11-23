@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page
 from django.db import IntegrityError
@@ -10,7 +11,11 @@ from .models import Group, Post, User, Comment, Follow
 
 @cache_page(1 * 20, key_prefix="index_page")
 def index(request):
-    post_list = Post.objects.prefetch_related('author', 'group').all()
+    post_list = Post.objects.all().select_related(
+        'author', 'group'
+    ).annotate(
+        count_comments=Count('comments'),
+    ).order_by('-pub_date')
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -24,10 +29,38 @@ def index(request):
     )
 
 
+@cache_page(1 * 20, key_prefix="users_all")
+def users_all(request):
+    users = User.objects.all().order_by("username")
+    return render(
+        request,
+        "users.html",
+        {
+            "users": users,
+        },
+    )
+
+
+@cache_page(1 * 60, key_prefix="groups_all")
+def groups_all(request):
+    groups = Group.objects.all()
+    return render(
+        request,
+        "groups.html",
+        {
+            "groups": groups,
+        },
+    )
+
+
 @cache_page(1 * 20, key_prefix="group_page")
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    posts_list = group.posts.prefetch_related('author', 'group').all()
+    posts_list = group.posts.prefetch_related(
+        'author', 'group'
+    ).all().annotate(
+        count_comments=Count('comments'),
+    ).order_by('-pub_date')
     paginator = Paginator(posts_list, 10)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -68,10 +101,12 @@ def new_post(request):
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    post_list = Post.objects.prefetch_related(
+    post_list = Post.objects.select_related(
         'author',
         'group',
-    ).filter(author=author)
+    ).filter(author=author).annotate(
+        count_comments=Count('comments'),
+    ).order_by('-pub_date')
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
@@ -102,7 +137,6 @@ def post_view(request, username, post_id):
     posts = Post.objects.filter(author=author).count()
     form = CommentForm(request.POST or None)
     comments = Comment.objects.prefetch_related(
-        'user',
         'author',
     ).filter(
         post=post
@@ -189,11 +223,14 @@ def delete_comment(request, username, post_id, comment_id):
 @login_required
 @cache_page(1 * 20, key_prefix="index_page")
 def follow_index(request):
-    follow = Follow.objects.filter(user=request.user)
-    authors = []
-    for user in follow:
-        authors.append(user.author)
-    posts = Post.objects.filter(author__in=authors)
+    posts = Post.objects.select_related(
+        'author',
+        'group',
+    ).filter(
+        author__following__user=request.user
+    ).annotate(
+        count_comments=Count('comments'),
+    ).order_by('-pub_date')
     paginator = Paginator(posts, 10)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)

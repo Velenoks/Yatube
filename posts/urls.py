@@ -6,6 +6,8 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('follow/', views.follow_index, name='follow_index'),
+    path('users/', views.users_all, name='users'),
+    path('groups_all/', views.groups_all, name='groups'),
     path('new/', views.new_post, name='new_post'),
     path('group/<slug:slug>/', views.group_posts, name='group'),
     path('<str:username>/', views.profile, name='profile'),

@@ -7,18 +7,21 @@ User = get_user_model()
 class Group(models.Model):
     title = models.CharField(
         verbose_name="Имя группы",
+        help_text="Придумайте название группы",
         max_length=200,
     )
     slug = models.SlugField(
         verbose_name="URL",
+        help_text="Придумайте URL группы",
         max_length=50,
         unique=True,
     )
     description = models.TextField(
-        verbose_name='Описание группы',
+        verbose_name="Описание группы",
     )
 
     class Meta:
+        ordering = ("title",)
         verbose_name = "Группа"
         verbose_name_plural = "Группы"
 
@@ -53,7 +56,6 @@ class Post(models.Model):
         upload_to="posts/",
         verbose_name="Картинка",
         blank=True,
-        null=True,
     )
 
     class Meta:
@@ -62,7 +64,7 @@ class Post(models.Model):
         verbose_name_plural = "Посты"
 
     def __str__(self):
-        return self.text
+        return self.text[:15]
 
 
 class Comment(models.Model):
