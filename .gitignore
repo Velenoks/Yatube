@@ -1,6 +1,7 @@
 .git/*
 env/
 venv/
+myenv/
 .venv
 .venv/
 .vscode/
@@ -14,6 +15,7 @@ coverage.xml
 __pycache__/
 *.py[cod]
 
+.env
 .idea
 .DS_Store
 .AppleDouble
@@ -25,5 +27,5 @@ __pycache__/
 static/
 posts/static/
 media/
-
+sent_emails/
 db.sqlite3
