@@ -28,4 +28,5 @@ static/
 posts/static/
 media/
 sent_emails/
+
 db.sqlite3
